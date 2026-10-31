@@ -2,289 +2,277 @@
 #include <iostream>
 using namespace std;
 
-class Node
-{
-public:
+struct Node {
     int data;
-    Node* prev;
     Node* next;
-
-    Node(int x)
-    {
-        data = x;
-        prev = next = NULL;
-    }
 };
 
-class CircularDoublyList
-{
-    Node* head;
+Node* head = NULL;
 
-public:
-    CircularDoublyList()
-    {
-        head = NULL;
+// Insert at beginning
+void insertBeginning(int x) {
+    Node* newNode = new Node();
+    newNode->data = x;
+
+    if (head == NULL) {
+        head = newNode;
+        newNode->next = head;
+        return;
     }
 
-    void insertBeginning(int x)
-    {
-        Node* n = new Node(x);
+    Node* temp = head;
 
-        if (head == NULL)
-        {
-            head = n;
-            n->next = n;
-            n->prev = n;
-            return;
-        }
-
-        Node* last = head->prev;
-
-        n->next = head;
-        n->prev = last;
-        last->next = n;
-        head->prev = n;
-        head = n;
+    while (temp->next != head) {
+        temp = temp->next;
     }
 
-    void insertEnd(int x)
-    {
-        if (head == NULL)
-        {
-            insertBeginning(x);
-            return;
-        }
+    newNode->next = head;
+    temp->next = newNode;
+    head = newNode;
+}
 
-        Node* n = new Node(x);
-        Node* last = head->prev;
+// Insert at end
+void insertEnd(int x) {
+    Node* newNode = new Node();
+    newNode->data = x;
 
-        n->next = head;
-        n->prev = last;
-        last->next = n;
-        head->prev = n;
+    if (head == NULL) {
+        head = newNode;
+        newNode->next = head;
+        return;
     }
 
-    void insertBefore(int key, int x)
-    {
-        Node* cur = head;
+    Node* temp = head;
 
-        if (cur == NULL)
-        {
-            cout << "List is empty\n";
-            return;
-        }
-
-        do
-        {
-            if (cur->data == key)
-            {
-                if (cur == head)
-                {
-                    insertBeginning(x);
-                    return;
-                }
-
-                Node* n = new Node(x);
-                n->prev = cur->prev;
-                n->next = cur;
-                cur->prev->next = n;
-                cur->prev = n;
-                return;
-            }
-
-            cur = cur->next;
-        } while (cur != head);
-
-        cout << "Value not found\n";
+    while (temp->next != head) {
+        temp = temp->next;
     }
 
-    void insertAfter(int key, int x)
-    {
-        Node* cur = head;
+    temp->next = newNode;
+    newNode->next = head;
+}
 
-        if (cur == NULL)
-        {
-            cout << "List is empty\n";
-            return;
-        }
-
-        do
-        {
-            if (cur->data == key)
-            {
-                Node* n = new Node(x);
-
-                n->prev = cur;
-                n->next = cur->next;
-                cur->next->prev = n;
-                cur->next = n;
-                return;
-            }
-
-            cur = cur->next;
-        } while (cur != head);
-
-        cout << "Value not found\n";
+// Insert after a specific node
+void insertAfter(int key, int x) {
+    if (head == NULL) {
+        cout << "List is empty\n";
+        return;
     }
 
-    void deleteNode(int key)
-    {
-        Node* cur = head;
+    Node* temp = head;
 
-        if (head == NULL)
-        {
-            cout << "List is empty\n";
+    do {
+        if (temp->data == key) {
+            Node* newNode = new Node();
+            newNode->data = x;
+            newNode->next = temp->next;
+            temp->next = newNode;
+
+            cout << "Node inserted\n";
             return;
         }
+        temp = temp->next;
+    } while (temp != head);
 
-        do
-        {
-            if (cur->data == key)
-            {
-                if (cur->next == cur)
-                {
-                    head = NULL;
-                }
-                else
-                {
-                    cur->prev->next = cur->next;
-                    cur->next->prev = cur->prev;
+    cout << "Node not found\n";
+}
 
-                    if (cur == head)
-                        head = cur->next;
-                }
+// Insert before a specific node
+void insertBefore(int key, int x) {
+    if (head == NULL) {
+        cout << "List is empty\n";
+        return;
+    }
 
-                delete cur;
+    if (head->data == key) {
+        insertBeginning(x);
+        return;
+    }
+
+    Node* temp = head;
+
+    while (temp->next != head && temp->next->data != key) {
+        temp = temp->next;
+    }
+
+    if (temp->next == head) {
+        cout << "Node not found\n";
+        return;
+    }
+
+    Node* newNode = new Node();
+    newNode->data = x;
+    newNode->next = temp->next;
+    temp->next = newNode;
+
+    cout << "Node inserted\n";
+}
+
+// Delete a specific node
+void deleteNode(int key) {
+    if (head == NULL) {
+        cout << "List is empty\n";
+        return;
+    }
+
+    Node* temp = head;
+    Node* prev = NULL;
+
+    do {
+        if (temp->data == key) {
+
+            // Only one node
+            if (temp->next == head && temp == head) {
+                head = NULL;
+                delete temp;
                 cout << "Node deleted\n";
                 return;
             }
 
-            cur = cur->next;
-        } while (cur != head);
+            // Deleting head
+            if (temp == head) {
+                Node* last = head;
 
-        cout << "Value not found\n";
-    }
+                while (last->next != head) {
+                    last = last->next;
+                }
 
-    void search(int key)
-    {
-        Node* cur = head;
-        int pos = 1;
+                head = head->next;
+                last->next = head;
+                delete temp;
 
-        if (head == NULL)
-        {
-            cout << "List is empty\n";
-            return;
-        }
-
-        do
-        {
-            if (cur->data == key)
-            {
-                cout << "Found at position "
-                     << pos << endl;
+                cout << "Node deleted\n";
                 return;
             }
 
-            cur = cur->next;
-            pos++;
-        } while (cur != head);
+            // Deleting middle or last node
+            prev->next = temp->next;
+            delete temp;
 
-        cout << "Value not found\n";
-    }
-
-    void display()
-    {
-        if (head == NULL)
-        {
-            cout << "List is empty\n";
+            cout << "Node deleted\n";
             return;
         }
 
-        Node* cur = head;
+        prev = temp;
+        temp = temp->next;
 
-        do
-        {
-            cout << cur->data << " <-> ";
-            cur = cur->next;
-        } while (cur != head);
+    } while (temp != head);
 
-        cout << "(head)\n";
+    cout << "Node not found\n";
+}
+
+// Search a node
+void searchNode(int key) {
+    if (head == NULL) {
+        cout << "List is empty\n";
+        return;
     }
-};
 
-int main()
-{
-    CircularDoublyList list;
-    int choice, x, key;
+    Node* temp = head;
+    int pos = 1;
 
-    do
-    {
-        cout << "\n1.Insert Beginning";
-        cout << "\n2.Insert End";
-        cout << "\n3.Insert Before";
-        cout << "\n4.Insert After";
-        cout << "\n5.Delete Specific Node";
-        cout << "\n6.Search";
-        cout << "\n7.Display";
-        cout << "\n0.Exit";
-        cout << "\nEnter choice: ";
-        cin >> choice;
-
-        switch (choice)
-        {
-        case 1:
-            cout << "Enter value: ";
-            cin >> x;
-            list.insertBeginning(x);
-            break;
-
-        case 2:
-            cout << "Enter value: ";
-            cin >> x;
-            list.insertEnd(x);
-            break;
-
-        case 3:
-            cout << "Insert before which value? ";
-            cin >> key;
-            cout << "Enter new value: ";
-            cin >> x;
-            list.insertBefore(key, x);
-            break;
-
-        case 4:
-            cout << "Insert after which value? ";
-            cin >> key;
-            cout << "Enter new value: ";
-            cin >> x;
-            list.insertAfter(key, x);
-            break;
-
-        case 5:
-            cout << "Enter value to delete: ";
-            cin >> key;
-            list.deleteNode(key);
-            break;
-
-        case 6:
-            cout << "Enter value to search: ";
-            cin >> key;
-            list.search(key);
-            break;
-
-        case 7:
-            list.display();
-            break;
-
-        case 0:
-            cout << "Exiting...\n";
-            break;
-
-        default:
-            cout << "Invalid choice\n";
+    do {
+        if (temp->data == key) {
+            cout << "Node found at position " << pos << endl;
+            return;
         }
 
-    } while (choice != 0);
+        temp = temp->next;
+        pos++;
+
+    } while (temp != head);
+
+    cout << "Node not found\n";
+}
+
+// Display list
+void display() {
+    if (head == NULL) {
+        cout << "List is empty\n";
+        return;
+    }
+
+    Node* temp = head;
+
+    do {
+        cout << temp->data << " -> ";
+        temp = temp->next;
+    } while (temp != head);
+
+    cout << "(HEAD)\n";
+}
+
+int main() {
+    int choice, x, key;
+
+    do {
+        cout << "\n--- CIRCULAR LINKED LIST ---\n";
+        cout << "1. Insert at Beginning\n";
+        cout << "2. Insert at End\n";
+        cout << "3. Insert After a Node\n";
+        cout << "4. Insert Before a Node\n";
+        cout << "5. Delete a Node\n";
+        cout << "6. Search a Node\n";
+        cout << "7. Display\n";
+        cout << "8. Exit\n";
+
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Enter value: ";
+                cin >> x;
+                insertBeginning(x);
+                break;
+
+            case 2:
+                cout << "Enter value: ";
+                cin >> x;
+                insertEnd(x);
+                break;
+
+            case 3:
+                cout << "Enter existing node value: ";
+                cin >> key;
+                cout << "Enter new value: ";
+                cin >> x;
+                insertAfter(key, x);
+                break;
+
+            case 4:
+                cout << "Enter existing node value: ";
+                cin >> key;
+                cout << "Enter new value: ";
+                cin >> x;
+                insertBefore(key, x);
+                break;
+
+            case 5:
+                cout << "Enter value to delete: ";
+                cin >> key;
+                deleteNode(key);
+                break;
+
+            case 6:
+                cout << "Enter value to search: ";
+                cin >> key;
+                searchNode(key);
+                break;
+
+            case 7:
+                display();
+                break;
+
+            case 8:
+                cout << "Exiting...";
+                break;
+
+            default:
+                cout << "Invalid choice\n";
+        }
+
+    } while (choice != 8);
 
     return 0;
 }
